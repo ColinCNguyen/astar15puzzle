@@ -9,6 +9,7 @@ import java.util.Scanner;
 import java.util.PriorityQueue;
 import java.util.Stack;
 import java.util.HashSet;
+import java.io.File;
 import java.io.InputStream;
 
 public class Solver
@@ -20,6 +21,7 @@ public class Solver
 	private Scanner source;  // source from which we read next board
 	private Timer timer;     // track wall-clock time of solution
 	private int count;       // number of states we enqueued during solution
+	private PriorityQueue <Board> theMoves = new PriorityQueue <Board>();
 
 
 	/**
@@ -29,13 +31,13 @@ public class Solver
 	 * @param cols columns for each puzzle
 	 * @param dataFile input source for board
 	 */
-	public Solver(int rows, int cols, InputStream dataFile)
+	public Solver(int rows, int cols, String dataFile)
 	{
 		try {
 			this.rows= rows;
 			this.cols= cols;
 			timer= new Timer();
-			source= new Scanner(dataFile);
+			source= new Scanner(new File(dataFile));
 		}
 		catch (Exception e) {
 			System.out.println(e);
@@ -52,7 +54,6 @@ public class Solver
 	{
 		int n= rows*cols;
 		char [] tiles= new char[n];
-
 		if (source.hasNextInt()) {
 			for (int i= 0; i<n; i++)
 				tiles[i]= (char)source.nextInt();
@@ -97,6 +98,7 @@ public class Solver
 	 */
 	public void display()
 	{
+		board.display();
 	}
 
 
@@ -115,7 +117,40 @@ public class Solver
 	 */
 	private Board astar(Board start)
 	{
-		return null;
+		Board currentBoard;
+		Board moveMade = start;
+		theMoves.add(start);
+		//while(theMoves.peek() != null){
+			currentBoard = theMoves.poll();
+			if(currentBoard.canMove('U')){
+				moveMade = new Board(currentBoard.moveUp(), currentBoard.getRows(), currentBoard.getCols());
+				moveMade.updateNewBoardValues('U', currentBoard, currentBoard.getSteps());
+				theMoves.add(moveMade);
+				count++;
+			}
+			if(currentBoard.canMove('D')){
+				moveMade = new Board(currentBoard.moveDown(), currentBoard.getRows(), currentBoard.getCols());
+				moveMade.updateNewBoardValues('D', currentBoard, currentBoard.getSteps());
+				theMoves.add(moveMade);
+				count++;
+			}
+			if(currentBoard.canMove('L')){
+				moveMade = new Board(currentBoard.moveLeft(), currentBoard.getRows(), currentBoard.getCols());
+				moveMade.updateNewBoardValues('L', currentBoard, currentBoard.getSteps());
+				theMoves.add(moveMade);
+				count++;
+			}
+			if(currentBoard.canMove('R')){
+				moveMade = new Board(currentBoard.moveRight(), currentBoard.getRows(), currentBoard.getCols());
+				moveMade.updateNewBoardValues('R', currentBoard, currentBoard.getSteps());
+				theMoves.add(moveMade);
+				count++;
+			}
+		//}
+			while(theMoves.peek() != null)
+				System.out.println(theMoves.poll());
+		
+		return moveMade;
 	}
 
 }

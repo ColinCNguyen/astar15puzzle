@@ -8,13 +8,14 @@
 
 public class Board implements Comparable<Board>
 {
-	private int rows,cols; // board size in rows/cols
-	private char [] tiles; // the actual tiles and their locations
-	private char dir;      // direction prev used to get here
-	private int  bpos;     // position of blank element
-	private Board prev;    // pointer to previous state
-	private int	h;         // heuristic value (manhattan distance)
-	private int	g;         // cost so far
+	private int rows,cols; 		// board size in rows/cols
+	private char [] tiles; 		// the actual tiles and their locations
+	private char dir;      		// direction prev used to get here
+	private int  bpos;     		// position of blank element
+	private Board prev;    		// pointer to previous state
+	private int	h;         		// heuristic value (manhattan distance)
+	private int	g;         		// cost so far
+	private char[]changeThis; 	//new tile array after a move
 
 
 	/**
@@ -50,7 +51,12 @@ public class Board implements Comparable<Board>
 	@Override
 	public int compareTo(Board other)
 	{
-		// your code here
+		int thisCurrentValue = this.manhattan() + this.g;
+		int otherCurrentValue = other.manhattan() + other.g;
+		if(thisCurrentValue > otherCurrentValue)
+			return 1;
+		if(thisCurrentValue < otherCurrentValue)
+			return -1;
 		return 0;
 	}
 
@@ -106,7 +112,6 @@ public class Board implements Comparable<Board>
 		return prev;
 	}
 
-
 	/**
 	 * Getter for steps traveled so far.
 	 */
@@ -114,7 +119,20 @@ public class Board implements Comparable<Board>
 	{
 		return g;
 	}
-
+	/**
+	 * Getter for column number
+	 * @return
+	 */
+	public int getCols(){
+		return cols;
+	}
+	/**
+	 * Getter for row number
+	 * @return
+	 */
+	public int getRows(){
+		return rows;
+	}
 
 
 	/**
@@ -126,8 +144,60 @@ public class Board implements Comparable<Board>
 	{
 		return h==0;
 	}
+	/**
+	 * Updates a new boards values of prev, dir, and g before adding to Priority Queue
+	 */
+	public void updateNewBoardValues(char directionMoved, Board prev, int prevG){
+		dir = directionMoved;
+		this.prev = prev;
+		this.g = prevG + 1;
+	}
 
-
+	/**
+	 * Alters the current boards char array to match the the blank piece being moved up
+	 * @return: the new char array for the move that is being made
+	 */
+	public char[] moveUp(){
+		changeThis = tiles.clone();
+		char temp = tiles[bpos - 4];
+		changeThis[bpos-4] = (char) ((rows*cols) - 1);
+		changeThis[bpos] = temp;
+		return changeThis;
+	}
+	/**
+	 * Alters the current boards char array to match the blank piece being moved down
+	 * @return: the new char array for the move being made
+	 */
+	public char[] moveDown(){
+		changeThis = tiles.clone();
+		char temp = tiles[bpos+4];
+		changeThis[bpos+4] = (char) ((rows*cols)-1);
+		changeThis[bpos] = temp;
+		return changeThis;
+	}
+	/**
+	 * Alters the current boards char array to match the blank piece being moved left
+	 * @return: the new char array for the move being made
+	 */
+	public char[] moveLeft(){
+		changeThis = tiles.clone();
+		char temp = tiles[bpos-1];
+		changeThis[bpos-1] = (char) ((rows*cols)-1);
+		changeThis[bpos] = temp;
+		return changeThis;
+	}
+	/**
+	 * Alters the current boards char array to match the blank piece being moved right
+	 * @return: the new char array for the move being made
+	 */
+	public char[] moveRight(){
+		changeThis = tiles.clone();
+		char temp = tiles[bpos+1];
+		changeThis[bpos+1] = (char) ((rows*cols)-1);
+		changeThis[bpos] = temp;
+		return changeThis;
+	}
+	
 	/**
 	 * Concise representation of the board.
 	 *
