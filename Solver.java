@@ -145,7 +145,7 @@ public class Solver
 				}
 				return currentBoard;
 			}
-			//Trys all four different moves and if they can be made creates a new board, updates their values, and then adds them to the Priority Queue.
+			//Tries all four different moves and if they can be made creates a new board, updates their values, and then adds them to the Priority Queue.
 			if(currentBoard.canMove('U')){
 				moveMade = new Board(currentBoard.moveUp(), currentBoard.getRows(), currentBoard.getCols());
 				moveMade.updateNewBoardValues('U', currentBoard, currentBoard.getSteps());
