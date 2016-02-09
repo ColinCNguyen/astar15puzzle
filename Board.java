@@ -1,7 +1,7 @@
 /**
  * Implements a text-based 15-puzzle board.
  *
- * @author  Terry Sergeant
+ * @author  Terry Sergeant & Colin Nguyen
  * @version Spring 2016
  *
  */
@@ -148,7 +148,7 @@ public class Board implements Comparable<Board>
 	 * Updates a new boards values of prev, dir, and g before adding to Priority Queue
 	 */
 	public void updateNewBoardValues(char directionMoved, Board prev, int prevG){
-		dir = directionMoved;
+		this.dir = directionMoved;
 		this.prev = prev;
 		this.g = prevG + 1;
 	}

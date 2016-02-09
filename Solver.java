@@ -1,7 +1,7 @@
 /**
  * Solves of the sliding tile puzzle with A* search.
  *
- * @author	Terry Sergeant
+ * @author	Terry Sergeant & Colin Nguyen
  * @version Spring 2016
  *
 */
@@ -21,7 +21,9 @@ public class Solver
 	private Scanner source;  // source from which we read next board
 	private Timer timer;     // track wall-clock time of solution
 	private int count;       // number of states we enqueued during solution
-	private PriorityQueue <Board> theMoves = new PriorityQueue <Board>();
+	private PriorityQueue <Board> theMoves = new PriorityQueue <Board>(); 	//Prioty Queue of the moves we can make
+	private Stack <Board> theSolutionPath = new Stack <Board>();			//A stack of boards representing the shortest path to solving		
+	private int numberOfSteps;		//Number of steps it took to solve.
 
 
 	/**
@@ -37,7 +39,11 @@ public class Solver
 			this.rows= rows;
 			this.cols= cols;
 			timer= new Timer();
-			source= new Scanner(new File(dataFile));
+			try{source= new Scanner(new File(dataFile));}
+			catch(Exception e){
+				System.out.println("Invalid file name.");
+				System.exit(-1);
+			}
 		}
 		catch (Exception e) {
 			System.out.println(e);
@@ -52,6 +58,8 @@ public class Solver
 	 */
 	public boolean nextBoard()
 	{
+		numberOfSteps = 0;
+		count = 0;
 		int n= rows*cols;
 		char [] tiles= new char[n];
 		if (source.hasNextInt()) {
@@ -98,7 +106,7 @@ public class Solver
 	 */
 	public void display()
 	{
-		board.display();
+		System.out.println("Time to solve: "+timer+" | States enqueued: "+count+" | "+"Number of steps it took: "+numberOfSteps);
 	}
 
 
@@ -107,6 +115,12 @@ public class Solver
 	 */
 	public void showSolution()
 	{
+		
+		while(!theSolutionPath.empty()){
+			theSolutionPath.pop().display();
+			numberOfSteps++;
+		}
+		solved.display();
 	}
 
 
@@ -120,8 +134,18 @@ public class Solver
 		Board currentBoard;
 		Board moveMade = start;
 		theMoves.add(start);
-		//while(theMoves.peek() != null){
+		while(theMoves.peek() != null){
 			currentBoard = theMoves.poll();
+			if(currentBoard.isGoal()){					//Win condition
+				Board prevTracker = currentBoard;
+				System.out.println("Found it");
+				while(prevTracker.getPrev() != null){	//Builds stack to show the path used to solve.
+					theSolutionPath.push(prevTracker.getPrev());
+					prevTracker = prevTracker.getPrev();
+				}
+				return currentBoard;
+			}
+			//Trys all four different moves and if they can be made creates a new board, updates their values, and then adds them to the Priority Queue.
 			if(currentBoard.canMove('U')){
 				moveMade = new Board(currentBoard.moveUp(), currentBoard.getRows(), currentBoard.getCols());
 				moveMade.updateNewBoardValues('U', currentBoard, currentBoard.getSteps());
@@ -146,10 +170,7 @@ public class Solver
 				theMoves.add(moveMade);
 				count++;
 			}
-		//}
-			while(theMoves.peek() != null)
-				System.out.println(theMoves.poll());
-		
+		}
 		return moveMade;
 	}
 
