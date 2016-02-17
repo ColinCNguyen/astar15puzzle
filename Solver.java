@@ -28,7 +28,7 @@ public class Solver
 	private Stack <Board> theSolutionPath = new Stack <Board>();			//A stack of boards representing the shortest path to solving		
 	private int numberOfSteps;		//Number of steps it took to solve.
 	private ArrayList<Board> seenStates = new ArrayList<Board>(50000);
-	private HashMap<Integer, Board> myMap = new HashMap<Integer, Board>(10000);
+	private HashMap<Integer, LinkedList<Board>> myMap = new HashMap<Integer, LinkedList<Board>>(500000);
 	private ArrayList<Board> [] myList = new ArrayList[16];
 	private int spotOfSame;			//Location of the identical board state in the array list.
 
@@ -93,14 +93,6 @@ public class Solver
 			timer.stop();
 		}
 	}
-	
-	/**
-	 * Override for hashCode
-	 */
-	public int hashCode(){
-		return 0;
-	}
-
 
 	/**
 	 * Gives concise representation if solving multiple boards.
@@ -142,11 +134,12 @@ public class Solver
 	 * @return true if we have, false if we havent
 	 */
 	public boolean newState(Board a){
+		int mapSpot = a.hash();
+		LinkedList<Board> linkedSpot = myMap.get(mapSpot);
 		boolean newOrNot = true;
 		int counter = 0;
-		int positionOfBlank = a.getBpos();
-		while(newOrNot && counter < myList[positionOfBlank].size()){
-			if(a.compareBoards(myList[positionOfBlank].get(counter))){
+		while(newOrNot && counter < linkedSpot.size()){
+			if(a.compareBoards(linkedSpot.get(counter))){
 				newOrNot = false;
 				spotOfSame = counter;
 			}
@@ -212,11 +205,20 @@ public class Solver
 	private Board astarImproved(Board start)
 	{
 		int spotOfBpos;
+		int spotInMap;
 		Board currentBoard;
 		Board moveMade = start;
 		theMoves.add(start);
-		
-		myList[start.getBpos()].add(start);
+		spotInMap = start.hash();
+		LinkedList<Board> temp;
+
+		if(myMap.get(spotInMap) == null){
+			temp = myMap.get(spotInMap);
+			temp = new LinkedList<Board>();
+			myMap.put(spotInMap, temp);
+		}
+		else
+			myMap.get(start.hash()).add(start);
 		
 		while(theMoves.peek() != null){
 			currentBoard = theMoves.poll();
@@ -234,14 +236,21 @@ public class Solver
 				moveMade = new Board(currentBoard.moveUp(), currentBoard.getRows(), currentBoard.getCols());
 				moveMade.updateNewBoardValues('U', currentBoard, currentBoard.getSteps());
 				spotOfBpos = moveMade.getBpos();
+				spotInMap = moveMade.hash();
+				if(myMap.get(spotInMap) == null){ //Checks to see if we need to initialize the linkedlist at spot.
+					temp = myMap.get(spotInMap);
+					temp = new LinkedList<Board>();
+					myMap.put(spotInMap, temp);
+				}
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
-					myList[moveMade.getBpos()].add(moveMade);
+					myMap.get(spotInMap).add(moveMade);
 					count++;
 				}
 				else{
-					if(moveMade.getSteps() < myList[spotOfBpos].get(spotOfSame).getSteps()){
-						myList[spotOfBpos].set(spotOfSame, moveMade);
+					if(moveMade.getSteps() < myMap.get(spotInMap).get(spotOfSame).getSteps()){
+						myMap.get(spotInMap).set(spotOfSame, moveMade);
+						System.out.println(spotOfSame);
 					}
 				}
 			}
@@ -249,14 +258,21 @@ public class Solver
 				moveMade = new Board(currentBoard.moveDown(), currentBoard.getRows(), currentBoard.getCols());
 				moveMade.updateNewBoardValues('D', currentBoard, currentBoard.getSteps());
 				spotOfBpos = moveMade.getBpos();
+				spotInMap = moveMade.hash();
+				if(myMap.get(spotInMap) == null){
+					temp = myMap.get(spotInMap);
+					temp = new LinkedList<Board>();
+					myMap.put(spotInMap, temp);
+				}
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
-					myList[moveMade.getBpos()].add(moveMade);
+					myMap.get(spotInMap).add(moveMade);
 					count++;
 				}
 				else{
-					if(moveMade.getSteps() < myList[spotOfBpos].get(spotOfSame).getSteps()){
-						myList[spotOfBpos].set(spotOfSame, moveMade);
+					if(moveMade.getSteps() < myMap.get(spotInMap).get(spotOfSame).getSteps()){
+						myMap.get(spotInMap).set(spotOfSame, moveMade);
+						System.out.println(spotOfSame);
 					}
 				}
 			}
@@ -264,14 +280,21 @@ public class Solver
 				moveMade = new Board(currentBoard.moveLeft(), currentBoard.getRows(), currentBoard.getCols());
 				moveMade.updateNewBoardValues('L', currentBoard, currentBoard.getSteps());
 				spotOfBpos = moveMade.getBpos();
+				spotInMap = moveMade.hash();
+				if(myMap.get(spotInMap) == null){
+					temp = myMap.get(spotInMap);
+					temp = new LinkedList<Board>();
+					myMap.put(spotInMap, temp);
+				}
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
-					myList[moveMade.getBpos()].add(moveMade);
+					myMap.get(spotInMap).add(moveMade);
 					count++;
 				}
 				else{
-					if(moveMade.getSteps() < myList[spotOfBpos].get(spotOfSame).getSteps()){
-						myList[spotOfBpos].set(spotOfSame, moveMade);
+					if(moveMade.getSteps() < myMap.get(spotInMap).get(spotOfSame).getSteps()){
+						myMap.get(spotInMap).set(spotOfSame, moveMade);
+						System.out.println(spotOfSame);
 					}
 				}
 			}
@@ -279,14 +302,21 @@ public class Solver
 				moveMade = new Board(currentBoard.moveRight(), currentBoard.getRows(), currentBoard.getCols());
 				moveMade.updateNewBoardValues('R', currentBoard, currentBoard.getSteps());
 				spotOfBpos = moveMade.getBpos();
+				spotInMap = moveMade.hash();
+				if(myMap.get(spotInMap) == null){
+					temp = myMap.get(spotInMap);
+					temp = new LinkedList<Board>();
+					myMap.put(spotInMap, temp);
+				}
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
-					myList[moveMade.getBpos()].add(moveMade);
+					myMap.get(spotInMap).add(moveMade);
 					count++;
 				}
 				else{
-					if(moveMade.getSteps() < myList[spotOfBpos].get(spotOfSame).getSteps()){
-						myList[spotOfBpos].set(spotOfSame, moveMade);
+					if(moveMade.getSteps() < myMap.get(spotInMap).get(spotOfSame).getSteps()){
+						myMap.get(spotInMap).set(spotOfSame, moveMade);
+						System.out.println(spotOfSame);
 					}
 				}
 			}

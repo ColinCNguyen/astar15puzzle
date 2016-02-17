@@ -16,6 +16,7 @@ public class Board implements Comparable<Board>
 	private int	h;         		// heuristic value (manhattan distance)
 	private int	g;         		// cost so far
 	private char[]changeThis; 	//new tile array after a move
+	private int ARRAYSIZE = 500777;
 
 
 	/**
@@ -58,6 +59,16 @@ public class Board implements Comparable<Board>
 		if(thisCurrentValue < otherCurrentValue)
 			return -1;
 		return 0;
+	}
+	
+	/**
+	 * My hash function
+	 */
+	public int hash(){
+		int myHash;
+		myHash = (((this.h*this.bpos) + this.g) * this.bpos)/(this.g+1);
+		myHash = myHash % ARRAYSIZE;
+		return myHash;
 	}
 
 
