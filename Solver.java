@@ -8,7 +8,9 @@
 import java.util.Scanner;
 import java.util.PriorityQueue;
 import java.util.Stack;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.io.File;
 import java.io.InputStream;
 
@@ -24,6 +26,9 @@ public class Solver
 	private PriorityQueue <Board> theMoves = new PriorityQueue <Board>(); 	//Prioty Queue of the moves we can make
 	private Stack <Board> theSolutionPath = new Stack <Board>();			//A stack of boards representing the shortest path to solving		
 	private int numberOfSteps;		//Number of steps it took to solve.
+	private ArrayList<Board> seenStates = new ArrayList<Board>(50000);
+	private ArrayList<Board> [] myList = new ArrayList[16];
+	private int spotOfSame;			//Location of the identical board state in the array list.
 
 
 	/**
@@ -82,9 +87,17 @@ public class Solver
 			System.out.println("No board loaded ... try calling nextBoard() ...");
 		else {
 			timer.start();
-			solved= astar(board);
+			solved= astarImproved(board);
 			timer.stop();
 		}
+	}
+	
+	/**
+	 * Initializes array lists that keep track of duplicate states.
+	 */
+	public void buildDuplicateTracker(){
+		for(int i=0; i<16; i++)
+			myList[i] = new ArrayList<Board>();
 	}
 
 
@@ -123,7 +136,24 @@ public class Solver
 		solved.display();
 	}
 
-
+	/**
+	 * Goes through the array list of already seen states to determine if its a new state or not
+	 * @return true if we have, false if we havent
+	 */
+	public boolean newState(Board a){
+		boolean newOrNot = true;
+		int counter = 0;
+		int positionOfBlank = a.getBpos();
+		while(newOrNot && counter < myList[positionOfBlank].size()){
+			if(a.compareBoards(myList[positionOfBlank].get(counter))){
+				newOrNot = false;
+				spotOfSame = counter;
+			}
+			counter++;
+		}
+		return newOrNot;
+	}
+	
 	/**
 	 * Performs A* search.
 	 *
@@ -138,7 +168,6 @@ public class Solver
 			currentBoard = theMoves.poll();
 			if(currentBoard.isGoal()){					//Win condition
 				Board prevTracker = currentBoard;
-				System.out.println("Found it");
 				while(prevTracker.getPrev() != null){	//Builds stack to show the path used to solve.
 					theSolutionPath.push(prevTracker.getPrev());
 					prevTracker = prevTracker.getPrev();
@@ -169,6 +198,97 @@ public class Solver
 				moveMade.updateNewBoardValues('R', currentBoard, currentBoard.getSteps());
 				theMoves.add(moveMade);
 				count++;
+			}
+		}
+		return moveMade;
+	}
+	
+	/**
+	 * Performs A* search with some improvements.
+	 *
+	 * @param start Starting board position
+	 */
+	private Board astarImproved(Board start)
+	{
+		int spotOfBpos;
+		Board currentBoard;
+		Board moveMade = start;
+		theMoves.add(start);
+		
+		buildDuplicateTracker();
+		myList[start.getBpos()].add(start);
+		
+		while(theMoves.peek() != null){
+			currentBoard = theMoves.poll();
+			if(currentBoard.isGoal()){					//Win condition
+				Board prevTracker = currentBoard;
+				System.out.println("Found it");
+				while(prevTracker.getPrev() != null){	//Builds stack to show the path used to solve.
+					theSolutionPath.push(prevTracker.getPrev());
+					prevTracker = prevTracker.getPrev();
+				}
+				return currentBoard;
+			}
+			//Tries all four different moves and if they can be made creates a new board, updates their values, and then adds them to the Priority Queue.
+			if(currentBoard.canMove('U')){
+				moveMade = new Board(currentBoard.moveUp(), currentBoard.getRows(), currentBoard.getCols());
+				moveMade.updateNewBoardValues('U', currentBoard, currentBoard.getSteps());
+				spotOfBpos = moveMade.getBpos();
+				if(newState(moveMade)){
+					theMoves.add(moveMade);
+					myList[moveMade.getBpos()].add(moveMade);
+					count++;
+				}
+				else{
+					if(moveMade.getSteps() < myList[spotOfBpos].get(spotOfSame).getSteps()){
+						myList[spotOfBpos].set(spotOfSame, moveMade);
+					}
+				}
+			}
+			if(currentBoard.canMove('D')){
+				moveMade = new Board(currentBoard.moveDown(), currentBoard.getRows(), currentBoard.getCols());
+				moveMade.updateNewBoardValues('D', currentBoard, currentBoard.getSteps());
+				spotOfBpos = moveMade.getBpos();
+				if(newState(moveMade)){
+					theMoves.add(moveMade);
+					myList[moveMade.getBpos()].add(moveMade);
+					count++;
+				}
+				else{
+					if(moveMade.getSteps() < myList[spotOfBpos].get(spotOfSame).getSteps()){
+						myList[spotOfBpos].set(spotOfSame, moveMade);
+					}
+				}
+			}
+			if(currentBoard.canMove('L')){
+				moveMade = new Board(currentBoard.moveLeft(), currentBoard.getRows(), currentBoard.getCols());
+				moveMade.updateNewBoardValues('L', currentBoard, currentBoard.getSteps());
+				spotOfBpos = moveMade.getBpos();
+				if(newState(moveMade)){
+					theMoves.add(moveMade);
+					myList[moveMade.getBpos()].add(moveMade);
+					count++;
+				}
+				else{
+					if(moveMade.getSteps() < myList[spotOfBpos].get(spotOfSame).getSteps()){
+						myList[spotOfBpos].set(spotOfSame, moveMade);
+					}
+				}
+			}
+			if(currentBoard.canMove('R')){
+				moveMade = new Board(currentBoard.moveRight(), currentBoard.getRows(), currentBoard.getCols());
+				moveMade.updateNewBoardValues('R', currentBoard, currentBoard.getSteps());
+				spotOfBpos = moveMade.getBpos();
+				if(newState(moveMade)){
+					theMoves.add(moveMade);
+					myList[moveMade.getBpos()].add(moveMade);
+					count++;
+				}
+				else{
+					if(moveMade.getSteps() < myList[spotOfBpos].get(spotOfSame).getSteps()){
+						myList[spotOfBpos].set(spotOfSame, moveMade);
+					}
+				}
 			}
 		}
 		return moveMade;

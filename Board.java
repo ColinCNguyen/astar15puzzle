@@ -111,6 +111,14 @@ public class Board implements Comparable<Board>
 	{
 		return prev;
 	}
+	
+	/**
+	 * Getter for bpos
+	 */
+	public int getBpos()
+	{
+		return bpos;
+	}
 
 	/**
 	 * Getter for steps traveled so far.
@@ -196,6 +204,22 @@ public class Board implements Comparable<Board>
 		changeThis[bpos+1] = (char) ((rows*cols)-1);
 		changeThis[bpos] = temp;
 		return changeThis;
+	}
+	
+	/**
+	 * Compares two board states to see if they are the same
+	 * @return true or false depending on if they are the same.
+	 */
+	public boolean compareBoards(Board otherBoard){
+		boolean stillEqual = true;
+		int counter = 0;
+		while(stillEqual && counter < this.tiles.length){
+			if(this.tiles[counter] == otherBoard.tiles[counter])
+				counter++;
+			else
+				stillEqual = false;
+		}
+		return stillEqual;
 	}
 	
 	/**
