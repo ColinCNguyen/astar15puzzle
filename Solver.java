@@ -5,6 +5,7 @@
  * @version Spring 2016
  *
 */
+import java.util.HashMap;
 import java.util.Scanner;
 import java.util.PriorityQueue;
 import java.util.Stack;
@@ -27,6 +28,7 @@ public class Solver
 	private Stack <Board> theSolutionPath = new Stack <Board>();			//A stack of boards representing the shortest path to solving		
 	private int numberOfSteps;		//Number of steps it took to solve.
 	private ArrayList<Board> seenStates = new ArrayList<Board>(50000);
+	private HashMap<Integer, Board> myMap = new HashMap<Integer, Board>(10000);
 	private ArrayList<Board> [] myList = new ArrayList[16];
 	private int spotOfSame;			//Location of the identical board state in the array list.
 
@@ -93,11 +95,10 @@ public class Solver
 	}
 	
 	/**
-	 * Initializes array lists that keep track of duplicate states.
+	 * Override for hashCode
 	 */
-	public void buildDuplicateTracker(){
-		for(int i=0; i<16; i++)
-			myList[i] = new ArrayList<Board>();
+	public int hashCode(){
+		return 0;
 	}
 
 
@@ -215,7 +216,6 @@ public class Solver
 		Board moveMade = start;
 		theMoves.add(start);
 		
-		buildDuplicateTracker();
 		myList[start.getBpos()].add(start);
 		
 		while(theMoves.peek() != null){
