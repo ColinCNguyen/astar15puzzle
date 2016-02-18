@@ -1,3 +1,5 @@
+import java.util.Random;
+
 /**
  * Implements a text-based 15-puzzle board.
  *
@@ -61,14 +63,36 @@ public class Board implements Comparable<Board>
 		return 0;
 	}
 	
-	/**
-	 * My hash function
-	 */
-	public int hash(){
-		int myHash;
-		myHash = (((this.h*this.bpos) + this.g) * this.bpos)/(this.g+1);
-		myHash = myHash % ARRAYSIZE;
-		return myHash;
+
+
+	@Override
+	public int hashCode() {
+		int result;
+		result = ((bpos+1253) * 7919 * ((int) this.tiles[5]+359)) % ARRAYSIZE;
+		return Math.abs(result);
+	}
+
+
+	@Override
+	public boolean equals(Object obj) {
+		
+		if (obj == null)
+			return false;
+		 if (!Board.class.isAssignableFrom(obj.getClass())) {
+		    return false;
+		 }
+		Board otherBoard = (Board) obj;
+		boolean stillEqual = true;
+		int counter = 0;
+		while(stillEqual && counter < this.tiles.length){
+			if(this.tiles[counter] == otherBoard.tiles[counter]){
+				counter++;
+			}
+			else{
+				stillEqual = false;
+			}
+		}
+		return stillEqual;
 	}
 
 
