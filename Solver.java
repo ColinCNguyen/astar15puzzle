@@ -217,12 +217,12 @@ public class Solver
 					myMap.put(spotInMap, moveMade);
 					count++;
 				}
-				/*else{
+				else{
 					if(moveMade.getSteps() < myMap.get(moveMade).getSteps()){
 						myMap.put(spotInMap, moveMade);
 					
 					}
-				}*/
+				}
 			}
 			if(currentBoard.canMove('D')){
 				moveMade = new Board(currentBoard.moveDown(), currentBoard.getRows(), currentBoard.getCols());

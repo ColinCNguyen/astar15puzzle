@@ -68,7 +68,7 @@ public class Board implements Comparable<Board>
 	@Override
 	public int hashCode() {
 		int result;
-		result = ((bpos+1253) * 7919 * ((int) this.tiles[5]+359)) % ARRAYSIZE;
+		result = (int) (((bpos+1253) * Math.pow((int) this.tiles[5] + 1, 2) * Math.pow((int) this.tiles[3] + 1, 3) + ((int) this.tiles[9] + 359) % ARRAYSIZE));
 		return Math.abs(result);
 	}
 
@@ -79,7 +79,7 @@ public class Board implements Comparable<Board>
 		if (obj == null)
 			return false;
 		 if (!Board.class.isAssignableFrom(obj.getClass())) {
-		    return false;
+				 return false;
 		 }
 		Board otherBoard = (Board) obj;
 		boolean stillEqual = true;
