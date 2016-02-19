@@ -20,10 +20,11 @@ public class Solver
 	private Scanner source;  // source from which we read next board
 	private Timer timer;     // track wall-clock time of solution
 	private int count;       // number of states we enqueued during solution
-	private PriorityQueue <Board> theMoves = new PriorityQueue <Board>(); 	//Prioty Queue of the moves we can make
+	private PriorityQueue <Board> theMoves; 	//Prioty Queue of the moves we can make
 	private Stack <Board> theSolutionPath = new Stack <Board>();			//A stack of boards representing the shortest path to solving		
 	private int numberOfSteps;		//Number of steps it took to solve.
-	private HashMap<Integer, Board> myMap = new HashMap<Integer, Board>(500000);
+	private HashMap<Board, Integer> myMap = new HashMap<Board, Integer>(500000);
+	private int otherCount;
 
 	/**
 	 * Initialize the solver by specifying puzzle sizes and input source.
@@ -81,7 +82,7 @@ public class Solver
 			System.out.println("No board loaded ... try calling nextBoard() ...");
 		else {
 			timer.start();
-			solved= astarImproved(board);
+			solved= astar(board);
 			timer.stop();
 		}
 	}
@@ -104,7 +105,7 @@ public class Solver
 	 */
 	public void display()
 	{
-		System.out.println("Time to solve: "+timer+" | States enqueued: "+count+" | "+"Number of steps it took: "+numberOfSteps);
+		System.out.println("Time to solve: "+timer+" | States enqueued: "+count+" | "+"Number of steps it took: "+numberOfSteps + " | " + "Duplicates: " + otherCount);
 	}
 
 
@@ -127,7 +128,7 @@ public class Solver
 	 */
 	public boolean newState(Board a){
 		boolean newOrNot = true;
-		if(myMap.containsValue(a)){
+		if(myMap.containsKey(a)){
 			newOrNot = false;
 		}
 		return newOrNot;
@@ -142,6 +143,7 @@ public class Solver
 	{
 		Board currentBoard;
 		Board moveMade = start;
+		theMoves = new PriorityQueue<Board>();
 		theMoves.add(start);
 		while(theMoves.peek() != null){
 			currentBoard = theMoves.poll();
@@ -190,11 +192,14 @@ public class Solver
 	private Board astarImproved(Board start)
 	{
 		int spotInMap;
+		otherCount = 0;
 		Board currentBoard;
+		theMoves = new PriorityQueue<Board>();
+		myMap.clear();
 		Board moveMade = start;
 		theMoves.add(start);
 		spotInMap = start.hashCode();
-		myMap.put(spotInMap, start);
+		myMap.put(moveMade, moveMade.getSteps());
 		
 		while(theMoves.peek() != null){
 			currentBoard = theMoves.poll();
@@ -214,26 +219,25 @@ public class Solver
 				spotInMap = moveMade.hashCode();
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
-					myMap.put(spotInMap, moveMade);
+					myMap.put(moveMade, moveMade.getSteps());
 					count++;
 				}
 				else{
-					if(moveMade.getSteps() < myMap.get(moveMade).getSteps()){
-						myMap.put(spotInMap, moveMade);
-					
+					otherCount++;		
 					}
 				}
-			}
 			if(currentBoard.canMove('D')){
 				moveMade = new Board(currentBoard.moveDown(), currentBoard.getRows(), currentBoard.getCols());
 				moveMade.updateNewBoardValues('D', currentBoard, currentBoard.getSteps());
 				spotInMap = moveMade.hashCode();
 				
 				if(newState(moveMade)){
-					theMoves.add(moveMade);
-					myMap.put(spotInMap, moveMade);
+					theMoves.add(moveMade);	
+					myMap.put(moveMade, moveMade.getSteps());
 					count++;
 				}
+				else
+					otherCount++;
 	
 			}
 			if(currentBoard.canMove('L')){
@@ -242,9 +246,11 @@ public class Solver
 				spotInMap = moveMade.hashCode();
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
-					myMap.put(spotInMap, moveMade);
+					myMap.put(moveMade, moveMade.getSteps());
 					count++;
 				}
+				else
+					otherCount++;
 				
 			}
 			if(currentBoard.canMove('R')){
@@ -254,9 +260,11 @@ public class Solver
 				
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
-					myMap.put(spotInMap, moveMade);
+					myMap.put(moveMade, moveMade.getSteps());
 					count++;
 				}
+				else
+					otherCount++;
 				
 			}
 		}
