@@ -23,7 +23,7 @@ public class Driver
 		while (solver.nextBoard()) {
 			solver.solve();
 			System.out.println(solver);
-			//solver.showSolution();
+			solver.showSolution();
 			solver.display();
 			System.out.println("------------------------------------------------");
 		}

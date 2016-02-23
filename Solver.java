@@ -6,6 +6,7 @@
  *
 */
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Scanner;
 import java.util.PriorityQueue;
 import java.util.Stack;
@@ -23,9 +24,11 @@ public class Solver
 	private PriorityQueue <Board> theMoves; 	//Prioty Queue of the moves we can make
 	private Stack <Board> theSolutionPath = new Stack <Board>();			//A stack of boards representing the shortest path to solving		
 	private int numberOfSteps;		//Number of steps it took to solve.
+	private Board curr;				//Used to track current element as we iterate over the priority queue
 	private HashMap<Board, Integer> myMap = new HashMap<Board, Integer>(500000);
 	private int otherCount;
-
+	private int betterStateTracker = 0;
+	private Iterator <Board> pqIterator;
 	/**
 	 * Initialize the solver by specifying puzzle sizes and input source.
 	 *
@@ -82,7 +85,7 @@ public class Solver
 			System.out.println("No board loaded ... try calling nextBoard() ...");
 		else {
 			timer.start();
-			solved= astar(board);
+			solved= astarImproved(board);
 			timer.stop();
 		}
 	}
@@ -105,7 +108,7 @@ public class Solver
 	 */
 	public void display()
 	{
-		System.out.println("Time to solve: "+timer+" | States enqueued: "+count+" | "+"Number of steps it took: "+numberOfSteps + " | " + "Duplicates: " + otherCount);
+		System.out.println("Time to solve: "+timer+" | States enqueued: "+count+" | "+"Number of steps it took: "+numberOfSteps + " | " + "Duplicates: " + otherCount + " | Better states: "+ betterStateTracker );
 	}
 
 
@@ -116,10 +119,11 @@ public class Solver
 	{
 		
 		while(!theSolutionPath.empty()){
-			theSolutionPath.pop().display();
+			theSolutionPath.pop();
+			//theSolutionPath.pop().display(); //Use to display step by step solution
 			numberOfSteps++;
 		}
-		solved.display();
+		//solved.display();
 	}
 
 	/**
@@ -191,14 +195,13 @@ public class Solver
 	 */
 	private Board astarImproved(Board start)
 	{
-		int spotInMap;
 		otherCount = 0;
 		Board currentBoard;
 		theMoves = new PriorityQueue<Board>();
+		pqIterator = theMoves.iterator();
 		myMap.clear();
 		Board moveMade = start;
 		theMoves.add(start);
-		spotInMap = start.hashCode();
 		myMap.put(moveMade, moveMade.getSteps());
 		
 		while(theMoves.peek() != null){
@@ -216,56 +219,75 @@ public class Solver
 			if(currentBoard.canMove('U')){
 				moveMade = new Board(currentBoard.moveUp(), currentBoard.getRows(), currentBoard.getCols());
 				moveMade.updateNewBoardValues('U', currentBoard, currentBoard.getSteps());
-				spotInMap = moveMade.hashCode();
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
 					myMap.put(moveMade, moveMade.getSteps());
 					count++;
 				}
 				else{
-					otherCount++;		
+					otherCount++;
+					if(moveMade.getSteps() < myMap.get(moveMade)){
+						betterStateTracker++;
+						myMap.put(moveMade, moveMade.getSteps());
+						if(theMoves.remove(moveMade))
+							theMoves.add(moveMade);
 					}
 				}
+			}
 			if(currentBoard.canMove('D')){
 				moveMade = new Board(currentBoard.moveDown(), currentBoard.getRows(), currentBoard.getCols());
-				moveMade.updateNewBoardValues('D', currentBoard, currentBoard.getSteps());
-				spotInMap = moveMade.hashCode();
-				
+				moveMade.updateNewBoardValues('D', currentBoard, currentBoard.getSteps());	
 				if(newState(moveMade)){
 					theMoves.add(moveMade);	
 					myMap.put(moveMade, moveMade.getSteps());
 					count++;
 				}
-				else
+				else{
 					otherCount++;
-	
+					if(moveMade.getSteps() < myMap.get(moveMade)){
+						betterStateTracker++;
+						myMap.put(moveMade, moveMade.getSteps());
+						if(theMoves.remove(moveMade))
+							theMoves.add(moveMade);
+					}
+				}
 			}
 			if(currentBoard.canMove('L')){
 				moveMade = new Board(currentBoard.moveLeft(), currentBoard.getRows(), currentBoard.getCols());
 				moveMade.updateNewBoardValues('L', currentBoard, currentBoard.getSteps());
-				spotInMap = moveMade.hashCode();
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
 					myMap.put(moveMade, moveMade.getSteps());
 					count++;
 				}
-				else
+				else{
 					otherCount++;
+					if(moveMade.getSteps() < myMap.get(moveMade)){
+						betterStateTracker++;
+						myMap.put(moveMade, moveMade.getSteps());
+						if(theMoves.remove(moveMade))
+							theMoves.add(moveMade);
+					}
+				}
 				
 			}
 			if(currentBoard.canMove('R')){
 				moveMade = new Board(currentBoard.moveRight(), currentBoard.getRows(), currentBoard.getCols());
-				moveMade.updateNewBoardValues('R', currentBoard, currentBoard.getSteps());
-				spotInMap = moveMade.hashCode();
-				
+				moveMade.updateNewBoardValues('R', currentBoard, currentBoard.getSteps());	
 				if(newState(moveMade)){
 					theMoves.add(moveMade);
 					myMap.put(moveMade, moveMade.getSteps());
 					count++;
 				}
-				else
+				else{
 					otherCount++;
-				
+					if(moveMade.getSteps() < myMap.get(moveMade)){
+						betterStateTracker++;
+						myMap.put(moveMade, moveMade.getSteps());
+						if(theMoves.remove(moveMade))
+							theMoves.add(moveMade);
+					}
+				}
 			}
 		}
 		return moveMade;

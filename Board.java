@@ -75,7 +75,6 @@ public class Board implements Comparable<Board>
 
 	@Override
 	public boolean equals(Object obj) {
-		
 		if (obj == null)
 			return false;
 		 if (!Board.class.isAssignableFrom(obj.getClass())) {
